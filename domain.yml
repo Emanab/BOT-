@@ -1,0 +1,64 @@
+slots:
+ city:
+  type: list
+ bookDate:
+  type: list
+ meal:
+  type: list
+ options:
+  type: list
+
+entities:
+ - city
+ - bookDate
+ - meal
+# - options
+
+intents:
+ - greet
+ - inform_travel
+ - affirm
+ - deny
+ - travel_status
+ - cancel_travel
+ - thankyou
+
+actions:
+ - utter_greet
+ - utter_thankyou
+ - utter_default
+ - utter_ask_travel_info
+ - utter_affirm_request
+ - utter_affirm_cancel
+ - utter_deny
+ - utter_ask_city
+ - utter_ask_time
+ - utter_ask_meal
+ - utter_meal_options
+ - action_check_status
+ - action_cancel_travel
+ - action_request_travel
+
+templates:
+ utter_greet:
+  - text: "Hi, ITWORX Travel bot is here!\nHow can i help you?"
+ utter_affirm_cancel:
+  - text: "Are you sure you want to cancel this trip?"
+ utter_affirm_request:
+  - text: "Are you sure you want to request this trip?"
+ utter_ask_city:
+  - text: "Please specify cities (from, to)?"
+ utter_ask_time:
+  - text: "Please specify date?"
+ utter_thankyou:
+  - text: "You're Welcome"
+ utter_deny:
+  - text: "request dismissed .."
+ utter_default:
+  - text: "Sorry, i did not catch that"
+ utter_ask_travel_info:
+  - text: "Tell me travel details."
+ utter_ask_meal:
+  - text: "Which meal type do you prefer?"
+ utter_meal_options:
+  - text: "We have hot diabetic meals, hindu, kosher, seafood, reduced fat and salt meals, meals for infants, and vegetarian meals"

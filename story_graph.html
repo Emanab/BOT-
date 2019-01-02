@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rasa Core Visualisation</title>
+    <script src="https://dagrejs.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+    <script src="https://dagrejs.github.io/project/dagre/latest/dagre.min.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://dagrejs.github.io/project/graphlib-dot/v0.6.3/graphlib-dot.js"></script>
+</head>
+<body>
+<div id="errormsg" style="color: #b00"></div>
+<svg>
+    <style>
+        .node.invisible > rect {
+            display: none;
+        }
+
+        .node.start > rect {
+            fill: #7f7;
+            rx: 30;
+            ry: 18;
+        }
+
+        .node.end > rect {
+            fill: #f77;
+            rx: 30;
+            ry: 18;
+        }
+
+        .node:not(.active) > rect, .node:not(.active) > .label {
+            opacity: 0.4;
+        }
+
+        .edgePath:not(.active) path {
+            opacity: 0.4;
+        }
+
+        .node.ellipsis > rect {
+            fill: #CCC;
+        }
+
+        .node.intent > rect {
+            fill: #7ff;
+        }
+
+        .node.dashed > rect {
+            stroke-dasharray: 5;
+        }
+
+        text {
+            font-weight: 300;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serf, serif;
+            font-size: 14px;
+            color: #1f1d1d;
+        }
+
+        .node rect {
+            stroke: #444;
+            fill: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .edgePath path {
+            stroke: #333;
+            stroke-width: 1.5px;
+        }
+
+        svg {
+            position: fixed;
+            top: 10px;
+            left: 0;
+            height: 100%;
+            width: 100%
+        }
+    </style>
+    <g></g>
+</svg>
+<script>
+
+  function serveGraph() {
+    let oldInputGraphValue;
+
+    const url = 'visualization.dot';
+    const refreshInterval = 500;
+
+    // trigger a refresh by fetching an updated graph
+    setInterval(function () {
+      fetch(url).then(r => r.text()).then(dot => {
+        document.getElementById('errormsg').innerHTML = '';
+        if (oldInputGraphValue === dot) return;
+
+        oldInputGraphValue = dot;
+        drawGraph(dot);
+      }).catch(err => {
+        document.getElementById('errormsg').innerHTML =
+          'Failed to update plot. (' + err.message + ')';
+      });
+    }, refreshInterval);
+  }
+
+  function drawGraph(graph) {
+    let g = graphlibDot.read(graph);
+    // Set margins, if not present
+    if (!g.graph().hasOwnProperty("marginx") &&
+      !g.graph().hasOwnProperty("marginy")) {
+      g.graph().marginx = 20;
+      g.graph().marginy = 20;
+    }
+    g.graph().transition = function (selection) {
+      return selection.transition().duration(300);
+    };
+    // Render the graph into svg g
+    d3.select("svg g").call(render, g);
+  }
+  // Set up zoom support
+  const svg = d3.select("svg"),
+    inner = d3.select("svg g"),
+    zoom = d3.zoom().on("zoom", function () {
+      inner.attr("transform", d3.event.transform);
+    });
+  svg.call(zoom);
+
+  // Create and configure the renderer
+  const render = dagreD3.render();
+
+  let isClient = false;
+  isClient = true;
+
+  if (isClient) {
+    // Mark all nodes and their edges as active
+    cssRules = document.styleSheets[0].cssRules;
+    cssRules[3].style.opacity = 1;
+    cssRules[4].style.opacity = 1;
+
+    let graph;
+    graph = `digraph  {
+0 [label=START, fillcolor=green, style=filled, fontsize=12, class="start active"];
+"-1" [label=END, fillcolor=red, style=filled, fontsize=12, class=end];
+1 [label=utter_greet, fontsize=12, class=""];
+2 [label=utter_affirm_cancel, fontsize=12, class=""];
+3 [label=action_cancel_travel, fontsize=12, class=""];
+4 [label=utter_thankyou, fontsize=12, class=""];
+5 [label=utter_ask_time, fontsize=12, class=""];
+6 [label=utter_ask_meal, fontsize=12, class=""];
+7 [label=utter_affirm_request, fontsize=12, class=""];
+8 [label=action_request_travel, fontsize=12, class=""];
+18 [label=utter_ask_city, fontsize=12, class=""];
+23 [label=utter_ask_meal, fontsize=12, class=""];
+24 [label=utter_meal_options, fontsize=12, class=""];
+25 [label=utter_ask_meal, fontsize=12, class=""];
+26 [label=utter_ask_city, fontsize=12, class=""];
+35 [label=action_check_status, fontsize=12, class=""];
+37 [label=utter_ask_city, fontsize=12, class=""];
+38 [label=utter_ask_time, fontsize=12, class=""];
+54 [label=action_request_travel, fontsize=12, class=""];
+63 [label=utter_ask_meal, fontsize=12, class=""];
+64 [label=utter_ask_time, fontsize=12, class=""];
+99 [label=utter_ask_meal, fontsize=12, class=""];
+116 [label=utter_ask_time, fontsize=12, class=""];
+178 [label=utter_ask_time, fontsize=12, class=""];
+183 [label=utter_affirm_request, fontsize=12, class=""];
+187 [label=utter_ask_meal, fontsize=12, class=""];
+188 [label=action_request_travel, fontsize=12, class=""];
+317 [label=greet, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+318 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+319 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+320 [label=thankyou, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+321 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+322 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+323 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+324 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+325 [label="inform_travelcity Doha", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+326 [label=cancel_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+327 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+328 [label=travel_status, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+329 [label="inform_travelcity cairo bookDate 109", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+330 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+331 [label="inform_travelcity budapest", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+332 [label="inform_travelcity cairo bookDate 210", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+333 [label="inform_travelcity Manila bookDate 116 meal soup", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+334 [label="inform_travelcity cairo bookDate 8 November meal what is the menu", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+335 [label="inform_travelcity cairo bookDate 2nd jan meal what is in the menu", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+336 [label="inform_travelbookDate 18th June", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+337 [label="inform_travelbookDate 16 october", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+338 [label=inform_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+339 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+340 [label=thankyou, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+341 [label="inform_travelbookDate 2-10", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+342 [label="inform_travelbookDate today 25th march", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+343 [label="inform_travelbookDate 17th January", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+344 [label="inform_travelbookDate 38", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+345 [label="inform_travelbookDate 3092019", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+346 [label="inform_travelmeal a meal for Infants", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+347 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+348 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+349 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+350 [label="inform_travelcity cairo", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+351 [label="inform_travelcity Pristina", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+352 [label="inform_travelbookDate 20-3", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+353 [label="inform_travelmeal what are the options", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+354 [label="inform_travelmeal kosher", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+355 [label="inform_travelcity cairo", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+356 [label="inform_travelcity Victoria", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+357 [label=thankyou, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+358 [label="inform_travelcity Taipei bookDate 2may", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+359 [label="inform_travelcity alex", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+360 [label="inform_travelbookDate 12th march", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+361 [label="inform_travelbookDate 206", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+362 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+363 [label="inform_travelbookDate 231", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+364 [label=thankyou, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+365 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+366 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+367 [label="inform_travelmeal ii", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+368 [label="inform_travelbookDate 2 aug 2018", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+369 [label=cancel_travel, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+370 [label="inform_travelbookDate 20 march", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+371 [label="inform_travelbookDate 246", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+372 [label="inform_travelbookDate 25th october", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+373 [label="inform_travelbookDate tues", shape=rect, style=filled, fillcolor=lightblue, class=intent];
+374 [label=affirm, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+375 [label=thankyou, shape=rect, style=filled, fillcolor=lightblue, class=intent];
+0 -> 317  [key=0, class=""];
+0 -> 318  [key=0, class=""];
+0 -> 319  [key=0, class=""];
+0 -> 320  [key=0, class=""];
+0 -> 321  [key=0, class=""];
+0 -> 322  [key=0, class=""];
+0 -> 323  [key=0, class=""];
+0 -> 324  [key=0, class=""];
+0 -> 325  [key=0, class=""];
+1 -> "-1"  [key=NONE, label="", class=""];
+1 -> 24  [key=NONE, label="", class=""];
+1 -> 326  [key=0, class=""];
+1 -> 327  [key=0, class=""];
+1 -> 328  [key=0, class=""];
+1 -> 329  [key=0, class=""];
+1 -> 330  [key=0, class=""];
+1 -> 331  [key=0, class=""];
+1 -> 332  [key=0, class=""];
+1 -> 333  [key=0, class=""];
+1 -> 334  [key=0, class=""];
+1 -> 335  [key=0, class=""];
+1 -> 336  [key=0, class=""];
+1 -> 337  [key=0, class=""];
+1 -> 338  [key=0, class=""];
+2 -> 339  [key=0, class=""];
+3 -> "-1"  [key=NONE, label="", class=""];
+3 -> 340  [key=0, class=""];
+4 -> "-1"  [key=NONE, label="", class=""];
+5 -> 341  [key=0, class=""];
+5 -> 342  [key=0, class=""];
+5 -> 343  [key=0, class=""];
+5 -> 344  [key=0, class=""];
+5 -> 345  [key=0, class=""];
+6 -> 7  [key=NONE, label="", class=""];
+6 -> 346  [key=0, class=""];
+7 -> 347  [key=0, class=""];
+7 -> 348  [key=0, class=""];
+8 -> "-1"  [key=NONE, label="", class=""];
+8 -> 349  [key=0, class=""];
+18 -> 6  [key=NONE, label="", class=""];
+18 -> 350  [key=0, class=""];
+18 -> 351  [key=0, class=""];
+18 -> 352  [key=0, class=""];
+23 -> 23  [key=NONE, label="", class=""];
+23 -> 353  [key=0, class=""];
+24 -> 25  [key=NONE, label="", class=""];
+24 -> 63  [key=NONE, label="", class=""];
+24 -> 6  [key=NONE, label="", class=""];
+24 -> 187  [key=NONE, label="", class=""];
+25 -> 26  [key=NONE, label="", class=""];
+25 -> 37  [key=NONE, label="", class=""];
+25 -> 354  [key=0, class=""];
+26 -> 7  [key=NONE, label="", class=""];
+26 -> 355  [key=0, class=""];
+26 -> 356  [key=0, class=""];
+35 -> 357  [key=0, class=""];
+35 -> 358  [key=0, class=""];
+37 -> 359  [key=0, class=""];
+38 -> 360  [key=0, class=""];
+38 -> 361  [key=0, class=""];
+38 -> 362  [key=0, class=""];
+38 -> 363  [key=0, class=""];
+54 -> 364  [key=0, class=""];
+54 -> 365  [key=0, class=""];
+54 -> 366  [key=0, class=""];
+63 -> 64  [key=NONE, label="", class=""];
+63 -> 367  [key=0, class=""];
+64 -> 7  [key=NONE, label="", class=""];
+64 -> 368  [key=0, class=""];
+99 -> 369  [key=0, class=""];
+116 -> 370  [key=0, class=""];
+116 -> 371  [key=0, class=""];
+178 -> 23  [key=NONE, label="", class=""];
+178 -> 372  [key=0, class=""];
+183 -> 373  [key=0, class=""];
+187 -> 374  [key=0, class=""];
+188 -> 375  [key=0, class=""];
+317 -> 1  [key=0, class=""];
+318 -> 5  [key=0, class=""];
+319 -> 37  [key=0, class=""];
+320 -> 4  [key=0, class=""];
+321 -> 18  [key=0, class=""];
+322 -> 23  [key=0, class=""];
+323 -> 25  [key=0, class=""];
+324 -> 26  [key=0, class=""];
+325 -> 63  [key=0, class=""];
+326 -> 2  [key=0, class=""];
+327 -> 18  [key=0, class=""];
+328 -> 35  [key=0, class=""];
+329 -> 99  [key=0, class=""];
+330 -> 116  [key=0, class=""];
+331 -> 178  [key=0, class=""];
+332 -> 6  [key=0, class=""];
+333 -> 7  [key=0, class=""];
+334 -> 23  [key=0, class=""];
+335 -> 24  [key=0, class=""];
+336 -> 25  [key=0, class=""];
+337 -> 26  [key=0, class=""];
+338 -> 37  [key=0, class=""];
+339 -> 3  [key=0, class=""];
+340 -> 4  [key=0, class=""];
+341 -> 6  [key=0, class=""];
+342 -> 23  [key=0, class=""];
+343 -> 7  [key=0, class=""];
+344 -> 18  [key=0, class=""];
+345 -> 25  [key=0, class=""];
+346 -> 7  [key=0, class=""];
+347 -> 8  [key=0, class=""];
+348 -> 54  [key=0, class=""];
+349 -> 8  [key=0, class=""];
+350 -> 23  [key=0, class=""];
+351 -> 63  [key=0, class=""];
+352 -> 18  [key=0, class=""];
+353 -> 24  [key=0, class=""];
+354 -> 37  [key=0, class=""];
+355 -> 7  [key=0, class=""];
+356 -> 183  [key=0, class=""];
+357 -> 4  [key=0, class=""];
+358 -> 23  [key=0, class=""];
+359 -> 38  [key=0, class=""];
+360 -> 6  [key=0, class=""];
+361 -> 7  [key=0, class=""];
+362 -> 8  [key=0, class=""];
+363 -> 23  [key=0, class=""];
+364 -> 4  [key=0, class=""];
+365 -> 4  [key=0, class=""];
+366 -> 8  [key=0, class=""];
+367 -> 116  [key=0, class=""];
+368 -> 7  [key=0, class=""];
+369 -> 2  [key=0, class=""];
+370 -> 18  [key=0, class=""];
+371 -> 26  [key=0, class=""];
+372 -> 6  [key=0, class=""];
+373 -> 178  [key=0, class=""];
+374 -> 188  [key=0, class=""];
+375 -> 4  [key=0, class=""];
+}
+`;
+    drawGraph(graph);
+  } else {
+    serveGraph();
+  }
+
+
+</script>
+</body>
+</html>

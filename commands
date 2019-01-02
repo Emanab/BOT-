@@ -1,0 +1,38 @@
+To Traing the model:
+
+python -m rasa_nlu.train -d data\examples\rasa\demo-rasa.json --config sample_configs\config_spacy.yml
+
+Hitting APIs
+
+GET http://localhost:5000/parse?q=hi&project=model_20181001-114258
+
+q = query param
+project = model trained name
+
+we can get all trained models from
+http://localhost:5000/status
+
+# on rasa nlu
+python -m rasa_nlu.train -c sample_configs\config_spacy.yml -d data\examples\rasa\demo-rasa.md
+
+from rasa_core :
+python -m rasa_core.train -s data\test_stories\stories.md -d data\test_domains\travel_form.yml -o models\my_dialoug_current_default --epochs 200
+
+to train a rasa core with stories and domain then finally output the model
+
+another:
+python -m rasa_core.train -s data\test_stories -d data\test_domains -o models\my_awesome_model --epochs 300
+
+
+python -m rasa_core.train -s data\test_stories\stories.md -d data\test_domains\default.yml -o models\mymodelsss
+
+
+
+
+
+
+
+
+
+
+
